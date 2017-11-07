@@ -31,12 +31,18 @@ public class PotluckDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL(getDeletePotluckTableSql());
+        sqLiteDatabase.execSQL(getCreatePotluckTableSql());
+        insertEvent(sqLiteDatabase, new Event("Halloween Party", new Date()));
+        insertEvent(sqLiteDatabase, new Event("Christmas Party", new Date()));
+        insertEvent(sqLiteDatabase, new Event("New Years Party", new Date()));
         updateMyDatabase(sqLiteDatabase, i, i1);
     }
 
     private void updateMyDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
         try {
             if (oldVersion < 1) {
+                db.execSQL(getDeletePotluckTableSql());
                 db.execSQL(getCreatePotluckTableSql());
                 insertEvent(db, new Event("Halloween Party", new Date()));
                 insertEvent(db, new Event("Christmas Party", new Date()));
@@ -57,6 +63,12 @@ public class PotluckDbHelper extends SQLiteOpenHelper {
         sql += "_id INTEGER PRIMARY KEY AUTOINCREMENT, ";
         sql += "EVENT_NAME TEXT, ";
         sql += "EVENT_DATE INTEGER);";
+        return sql;
+    }
+
+    private String getDeletePotluckTableSql() {
+        String sql = "";
+        sql += "DROP TABLE IF EXISTS EVENT_MASTER;";
         return sql;
     }
 
