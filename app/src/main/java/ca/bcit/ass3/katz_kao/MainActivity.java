@@ -24,30 +24,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView list_continents = (ListView) findViewById(R.id.list_events);
+        ListView list_events = (ListView) findViewById(R.id.list_events);
 
-        String[] continents = getEvents();
+        String[] events = getEvents();
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_list_item_1, continents
+                this, android.R.layout.simple_list_item_1, events
         );
 
-        list_continents.setAdapter(arrayAdapter);
+        list_events.setAdapter(arrayAdapter);
 
-        /*
-        list_continents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list_events.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 TextView tv = (TextView) view;
-                String continent = tv.getText().toString();
+                String event = tv.getText().toString();
 
-                Intent intent = new Intent(MainActivity.this, CountryActivity.class);
-                intent.putExtra("continent", continent);
+                Intent intent = new Intent(MainActivity.this, ItemActivity.class);
+                intent.putExtra("event", event);
 
                 startActivity(intent);
             }
         });
-        */
     }
 
     @Override
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         String[] events = null;
         try {
             db = helper.getReadableDatabase();
-            Cursor cursor = db.rawQuery("select EVENT_NAME CONTINENT from EVENT_MASTER", null);
+            Cursor cursor = db.rawQuery("select DISTINCT EVENT_NAME from EVENT_MASTER", null);
 
             int count = cursor.getCount();
             events = new String[count];
@@ -80,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             }
         } catch (SQLiteException sqlex) {
-            String msg = "[MainActivity / getContinents] DB unavailable";
+            String msg = "[MainActivity / getEvents] DB unavailable";
             msg += "\n\n" + sqlex.toString();
 
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
