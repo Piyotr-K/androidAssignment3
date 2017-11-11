@@ -7,6 +7,9 @@
     android:orientation="vertical"
     tools:context="ca.bcit.ass3.katz_kao.MainActivity">
 
+    <include layout="@layout/main_toolbar" android:id="@+id/main_toolbar">
+    </include>
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
