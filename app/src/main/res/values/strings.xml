@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">katz_kao</string>
+    <string name="items_page">Items</string>
+    <string name="btn_add">Add an event</string>
 </resources>

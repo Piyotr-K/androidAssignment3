@@ -16,7 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ItemActivity"></activity>
+        <activity
+            android:name=".ItemActivity"
+            android:label="@string/items_page">
+        </activity>
     </application>
 
 </manifest>

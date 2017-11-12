@@ -11,9 +11,9 @@ import java.util.Date;
 public class Event {
 
     private String eventName;
-    private Date eventDate;
+    private String eventDate;
 
-    public Event(String name, Date date){
+    public Event(String name, String date){
         eventName = name;
         eventDate = date;
     }
@@ -22,7 +22,7 @@ public class Event {
         eventName = name;
     }
 
-    public void setEventDate (Date date) {
+    public void setEventDate (String date) {
         eventDate = date;
     }
 
@@ -30,27 +30,8 @@ public class Event {
         return eventName;
     }
 
-    public Date getEventDate() {
+    public String getEventDate() {
         return eventDate;
-    }
-
-    public Long getMilliDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss"); //Or whatever format fits best your needs.
-        SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-        String dateFormatted = f.format(eventDate);
-        long milliseconds = 0;
-        try {
-            Date d = f.parse(dateFormatted);
-            milliseconds = d.getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return milliseconds;
-    }
-
-    public void setMilliDate(Long ms) {
-        Date d = new Date(ms);
-        eventDate = d;
     }
 
 }
