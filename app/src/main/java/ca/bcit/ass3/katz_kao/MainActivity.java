@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
                 TextView tv = list.getText1();
                 String event = tv.getText().toString();
 
-                System.out.println(event);
-
                 Intent intent = new Intent(MainActivity.this, ItemActivity.class);
                 intent.putExtra("event", event);
 
@@ -104,9 +102,10 @@ public class MainActivity extends AppCompatActivity {
         cursor.requery();
     }
 
+    @SuppressWarnings("deprecation")
     private void deleteEvent(String eventName) {
         try {
-            db.rawQuery("DELETE FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';", null);
+            db.execSQL("DELETE FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';");
         } catch (SQLiteException sqlex) {
             String msg = "[MainActivity / getEvents] DB unavailable";
             msg += "\n\n" + sqlex.toString();
@@ -114,6 +113,21 @@ public class MainActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
+        cursor.requery();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void findEvent(String eventName) {
+        try {
+            db.execSQL("SELECT * FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';");
+        } catch (SQLiteException sqlex) {
+            String msg = "[MainActivity / getEvents] DB unavailable";
+            msg += "\n\n" + sqlex.toString();
+
+            Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+            t.show();
+        }
+        cursor.requery();
     }
 
     @Override
@@ -124,15 +138,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder builder;
+        final Context cur = this;
+        final EditText input;
         switch (item.getItemId()) {
             case R.id.menu_add:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder = new AlertDialog.Builder(this);
                 builder.setTitle("Enter an event name");
-                final Context cur = this;
 
                 // Set up the input
-                final EditText input = new EditText(this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                input = new EditText(this);
                 input.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(input);
 
@@ -153,6 +168,60 @@ public class MainActivity extends AppCompatActivity {
                 });
                 builder.show();
                 Toast.makeText(this, "Add Item Clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menu_delete:
+                builder = new AlertDialog.Builder(this);
+                builder.setTitle("Enter an event name");
+
+                // Set up the input
+                input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mText = input.getText().toString();
+                        Toast.makeText(cur, "Entered: " + mText, Toast.LENGTH_SHORT).show();
+                        deleteEvent(mText);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+                Toast.makeText(this, "Del Item Clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menu_search:
+                builder = new AlertDialog.Builder(this);
+                builder.setTitle("Enter an event name");
+
+                // Set up the input
+                input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mText = input.getText().toString();
+                        Toast.makeText(cur, "Entered: " + mText, Toast.LENGTH_SHORT).show();
+                        findEvent(mText);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+                Toast.makeText(this, "Find Item Clicked", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

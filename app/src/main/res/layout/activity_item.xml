@@ -10,12 +10,6 @@
     <include layout="@layout/main_toolbar" android:id="@+id/main_toolbar">
     </include>
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/itemTable">
-    </TableLayout>
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

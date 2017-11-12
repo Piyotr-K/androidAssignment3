@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">katz_kao</string>
     <string name="items_page">Items</string>
-    <string name="btn_add">Add an event</string>
+    <string name="btn_add">Add</string>
+    <string name="btn_search">Search</string>
+    <string name="btn_del">Delete</string>
+    <string name="item_name">Name</string>
+    <string name="item_unit">Unit</string>
+    <string name="item_amt">Quantity</string>
 </resources>
