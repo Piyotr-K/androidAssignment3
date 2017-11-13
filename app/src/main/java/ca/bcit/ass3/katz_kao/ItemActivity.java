@@ -31,7 +31,7 @@ public class ItemActivity extends AppCompatActivity {
     private Cursor cursor;
     private long eventId;
     private String text1, text2, text3;
-    private final int margin = 50;
+    private static String loadSql = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public class ItemActivity extends AppCompatActivity {
     }
 
     private ListAdapter getItems() {
-        cursor = db.rawQuery("select _detailId _id, * FROM EVENT_DETAIL WHERE eventId = " + eventId + ";", null);
+        cursor = db.rawQuery("select _detailId _id, * FROM EVENT_DETAIL WHERE eventId = " + eventId + " AND ItemName LIKE '%" + loadSql + "%';", null);
         cursor.moveToFirst();
         ListAdapter adapter = new ItemAdapter(ctx,
                 R.layout.item_layout,
@@ -78,9 +78,8 @@ public class ItemActivity extends AppCompatActivity {
         try {
             ContentValues values = new ContentValues();
             values.put("ItemName", itemName);
-            values.put("ItemUnit", "Hello");
-            values.put("ItemQuantity" , //Integer.parseInt(itemAmt)
-                3);
+            values.put("ItemUnit", itemUnit);
+            values.put("ItemQuantity" , Integer.parseInt(itemAmt));
             values.put("eventId", eventId);
             db.insert("EVENT_DETAIL", null, values);
         } catch (SQLiteException sqlex) {
@@ -105,6 +104,21 @@ public class ItemActivity extends AppCompatActivity {
             t.show();
         }
         cursor.requery();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void findItem(String eventName) {
+        try {
+            loadSql = eventName;
+        } catch (SQLiteException sqlex) {
+            String msg = "[MainActivity / getEvents] DB unavailable";
+            msg += "\n\n" + sqlex.toString();
+
+            Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+            t.show();
+        }
+        cursor.requery();
+        ItemActivity.this.recreate();
     }
 
     @Override
@@ -152,7 +166,6 @@ public class ItemActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
-                Toast.makeText(this, "Add Item Clicked", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.menu_delete:
                 builder = new AlertDialog.Builder(this);
@@ -177,7 +190,31 @@ public class ItemActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
-                Toast.makeText(this, "Del Item Clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menu_search:
+                builder = new AlertDialog.Builder(this);
+                builder.setTitle("Enter an event name");
+
+                // Set up the input
+                input1 = new EditText(this);
+                input1.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input1);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        text1 = input1.getText().toString();
+                        findItem(text1);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

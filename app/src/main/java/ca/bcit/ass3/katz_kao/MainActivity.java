@@ -1,5 +1,7 @@
 package ca.bcit.ass3.katz_kao;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,20 +19,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.TwoLineListItem;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private SQLiteDatabase db = null;
     private SQLiteOpenHelper helper = null;
     private Cursor cursor = null;
-    private String mText = "";
+    private static String loadSql = "select _eventId _id, * FROM EVENT_MASTER;";
+    private String textIn1, textIn2;
     private Context ctx;
 
     @Override
@@ -47,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         helper = new PotluckDbHelper(ctx);
         db = helper.getReadableDatabase();
-        cursor = db.rawQuery("select _eventId _id, * FROM EVENT_MASTER;", null);
+        cursor = db.rawQuery(loadSql, null);
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(ctx,
                 android.R.layout.simple_list_item_2,
                 cursor,
@@ -86,11 +94,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("deprecation")
-    private void addEvent(String eventName) {
+    private void addEvent(String eventName, String dateTime) {
         try {
             ContentValues values = new ContentValues();
             values.put("EVENT_NAME", eventName);
-            values.put("EVENT_DATE", "2017-12-12 12:12:12");
+            values.put("EVENT_DATE", dateTime);
             db.insert("EVENT_MASTER", null, values);
         } catch (SQLiteException sqlex) {
             String msg = "[MainActivity / getEvents] DB unavailable";
@@ -105,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private void deleteEvent(String eventName) {
         try {
-            db.execSQL("DELETE FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';");
+            db.execSQL("DELETE FROM EVENT_MASTER WHERE EVENT_NAME LIKE '" + eventName + "%';");
         } catch (SQLiteException sqlex) {
             String msg = "[MainActivity / getEvents] DB unavailable";
             msg += "\n\n" + sqlex.toString();
@@ -119,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private void findEvent(String eventName) {
         try {
-            db.execSQL("SELECT * FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';");
+            loadSql = "SELECT _eventId _id, * FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';";
         } catch (SQLiteException sqlex) {
             String msg = "[MainActivity / getEvents] DB unavailable";
             msg += "\n\n" + sqlex.toString();
@@ -128,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             t.show();
         }
         cursor.requery();
+        MainActivity.this.recreate();
     }
 
     @Override
@@ -141,23 +150,72 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder;
         final Context cur = this;
         final EditText input;
+        final EditText input2;
+        final EditText input3;
+
+        final Calendar calendar = Calendar.getInstance();
+
         switch (item.getItemId()) {
             case R.id.menu_add:
                 builder = new AlertDialog.Builder(this);
-                builder.setTitle("Enter an event name");
-
+                builder.setTitle("Add an event");
+                View mView = getLayoutInflater().inflate(R.layout.dialog_event_layout, null);
                 // Set up the input
-                input = new EditText(this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
+                input = mView.findViewById(R.id.dialog_entry_name);
+                input2 = mView.findViewById(R.id.dialog_entry_date);
+                input3 = mView.findViewById(R.id.dialog_entry_time);
+                builder.setView(mView);
+
+                input2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+                                calendar.set(Calendar.YEAR, year);
+                                calendar.set(Calendar.MONTH, monthOfYear);
+                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                String formatDate = "MMMM dd, yyyy";
+                                SimpleDateFormat sdf = new SimpleDateFormat(formatDate, Locale.CANADA);
+                                input2.setText(sdf.format(calendar.getTime()));
+                            }
+                        };
+                        new DatePickerDialog(ctx, date, calendar
+                                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                                calendar.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+
+                input3.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+
+                        TimePickerDialog timePicker = new TimePickerDialog(ctx, new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                                String AM_PM = "AM";
+                                if (selectedHour >= 12) {
+                                    AM_PM = "PM";
+                                }
+                                input3.setText(selectedHour + ":" + selectedMinute + " " + AM_PM);
+                            }
+                        }, hour, minute, true);
+                        timePicker.setTitle("Select Time");
+                        timePicker.show();
+                    }
+                });
 
                 // Set up the buttons
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mText = input.getText().toString();
-                        Toast.makeText(cur, "Entered: " + mText, Toast.LENGTH_SHORT).show();
-                        addEvent(mText);
+                        textIn1 = input.getText().toString();
+                        textIn2 = input2.getText().toString() + " " + input3.getText().toString();
+                        Toast.makeText(cur, "Entered: " + textIn1, Toast.LENGTH_SHORT).show();
+                        addEvent(textIn1, textIn2);
+                        MainActivity.this.recreate();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -167,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
-                Toast.makeText(this, "Add Item Clicked", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.menu_delete:
                 builder = new AlertDialog.Builder(this);
@@ -182,9 +239,9 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mText = input.getText().toString();
-                        Toast.makeText(cur, "Entered: " + mText, Toast.LENGTH_SHORT).show();
-                        deleteEvent(mText);
+                        textIn1 = input.getText().toString();
+                        Toast.makeText(cur, "Entered: " + textIn1, Toast.LENGTH_SHORT).show();
+                        deleteEvent(textIn1);
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -194,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
-                Toast.makeText(this, "Del Item Clicked", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.menu_search:
                 builder = new AlertDialog.Builder(this);
@@ -209,9 +265,9 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mText = input.getText().toString();
-                        Toast.makeText(cur, "Entered: " + mText, Toast.LENGTH_SHORT).show();
-                        findEvent(mText);
+                        textIn1 = input.getText().toString();
+                        Toast.makeText(cur, "Entered: " + textIn1, Toast.LENGTH_SHORT).show();
+                        findEvent(textIn1);
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -221,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
-                Toast.makeText(this, "Find Item Clicked", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
