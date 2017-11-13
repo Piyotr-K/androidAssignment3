@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -60,11 +61,11 @@ public class ItemActivity extends AppCompatActivity {
         cursor = db.rawQuery("select _eventId FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + evntName + "%' collate nocase;", null);
         cursor.moveToFirst();
         eventId = cursor.getLong(cursor.getColumnIndex("_eventId"));
-        cursor = null;
     }
 
     private ListAdapter getItems() {
         cursor = db.rawQuery("select _detailId _id, * FROM EVENT_DETAIL WHERE eventId = " + eventId + ";", null);
+        cursor.moveToFirst();
         ListAdapter adapter = new ItemAdapter(ctx,
                 R.layout.item_layout,
                 cursor,
@@ -77,8 +78,9 @@ public class ItemActivity extends AppCompatActivity {
         try {
             ContentValues values = new ContentValues();
             values.put("ItemName", itemName);
-            values.put("ItemUnit", itemUnit);
-            values.put("ItemQuantity" , Integer.parseInt(itemAmt));
+            values.put("ItemUnit", "Hello");
+            values.put("ItemQuantity" , //Integer.parseInt(itemAmt)
+                3);
             values.put("eventId", eventId);
             db.insert("EVENT_DETAIL", null, values);
         } catch (SQLiteException sqlex) {
@@ -117,52 +119,21 @@ public class ItemActivity extends AppCompatActivity {
         final EditText input1;
         final EditText input2;
         final EditText input3;
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        textParams.setMargins(margin, margin, margin, margin);
-
-        LinearLayout.LayoutParams inputParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        inputParams.setMargins(margin, 0, margin, 0);
 
         switch (item.getItemId()) {
             case R.id.menu_add:
                 builder = new AlertDialog.Builder(this);
-                LinearLayout lyout= new LinearLayout(this);
-                lyout.setOrientation(LinearLayout.VERTICAL);
-
-                TextView itemNameTv = new TextView(this);
-                itemNameTv.setText("Enter an item name:");
-                itemNameTv.setLayoutParams(textParams);
-
-                TextView itemUnitTv = new TextView(this);
-                itemUnitTv.setText("Enter an item unit:");
-                itemUnitTv.setLayoutParams(textParams);
-
-                TextView itemAmtTv = new TextView(this);
-                itemAmtTv.setText("Enter the item quantity:");
-                itemAmtTv.setLayoutParams(textParams);
 
                 builder.setTitle("Enter an item");
 
+                View mView = getLayoutInflater().inflate(R.layout.dialog_layout, null);
+
                 // Set up the input
-                input1 = new EditText(this);
-                input1.setInputType(InputType.TYPE_CLASS_TEXT);
-                input1.setLayoutParams(inputParams);
+                input1 = mView.findViewById(R.id.dialog_entry_1);
+                input2 = mView.findViewById(R.id.dialog_entry_2);
+                input3 = mView.findViewById(R.id.dialog_entry_3);
 
-                input2 = new EditText(this);
-                input2.setInputType(InputType.TYPE_CLASS_TEXT);
-                input2.setLayoutParams(inputParams);
-
-                input3 = new EditText(this);
-                input3.setInputType(InputType.TYPE_CLASS_TEXT);
-                input3.setLayoutParams(inputParams);
-
-                lyout.addView(itemNameTv);
-                lyout.addView(input1);
-                lyout.addView(itemUnitTv);
-                lyout.addView(input2);
-                lyout.addView(itemAmtTv);
-                lyout.addView(input3);
-                builder.setView(lyout);
+                builder.setView(mView);
 
                 // Set up the buttons
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -189,7 +160,6 @@ public class ItemActivity extends AppCompatActivity {
                 // Set up the input
                 input1 = new EditText(this);
                 input1.setInputType(InputType.TYPE_CLASS_TEXT);
-                input1.setLayoutParams(inputParams);
                 builder.setView(input1);
 
                 // Set up the buttons

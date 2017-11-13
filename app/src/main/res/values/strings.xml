@@ -7,4 +7,7 @@
     <string name="item_name">Name</string>
     <string name="item_unit">Unit</string>
     <string name="item_amt">Quantity</string>
+    <string name="item_name_entry">Enter an item name:</string>
+    <string name="item_unit_entry">Enter the item\'s unit</string>
+    <string name="item_amt_entry">Enter the item quantity</string>
 </resources>
