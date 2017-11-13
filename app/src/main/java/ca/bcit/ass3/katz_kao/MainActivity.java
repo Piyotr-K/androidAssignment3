@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase db = null;
     private SQLiteOpenHelper helper = null;
     private Cursor cursor = null;
-    private static String loadSql = "select _eventId _id, * FROM EVENT_MASTER;";
+    private static String loadSql = "";
     private String textIn1, textIn2;
     private Context ctx;
 
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         helper = new PotluckDbHelper(ctx);
         db = helper.getReadableDatabase();
-        cursor = db.rawQuery(loadSql, null);
+        cursor = db.rawQuery("SELECT _eventId _id, * FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + loadSql + "%';", null);
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(ctx,
                 android.R.layout.simple_list_item_2,
                 cursor,
@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void addEvent(String eventName, String dateTime) {
         try {
             ContentValues values = new ContentValues();
@@ -107,10 +106,9 @@ public class MainActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
+        refresh();
     }
 
-    @SuppressWarnings("deprecation")
     private void deleteEvent(String eventName) {
         try {
             db.execSQL("DELETE FROM EVENT_MASTER WHERE EVENT_NAME LIKE '" + eventName + "%';");
@@ -121,13 +119,12 @@ public class MainActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
+        refresh();
     }
 
-    @SuppressWarnings("deprecation")
     private void findEvent(String eventName) {
         try {
-            loadSql = "SELECT _eventId _id, * FROM EVENT_MASTER WHERE EVENT_NAME LIKE '%" + eventName + "%';";
+            loadSql = eventName;
         } catch (SQLiteException sqlex) {
             String msg = "[MainActivity / getEvents] DB unavailable";
             msg += "\n\n" + sqlex.toString();
@@ -135,7 +132,10 @@ public class MainActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
+        refresh();
+    }
+
+    private void refresh() {
         MainActivity.this.recreate();
     }
 

@@ -35,16 +35,9 @@ public class PotluckDbHelper extends SQLiteOpenHelper {
     }
 
     private void updateMyDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(getDeleteDetailTableSql());
-        db.execSQL(getDeleteMasterTableSql());
-        db.execSQL(getCreateMasterTableSql());
-        db.execSQL(getCreateDetailTableSql());
         try {
-            insertEvent(db, new Event("Halloween Party", "2017-10-31 5:00:00PM"));
-            insertEvent(db, new Event("Christmas Party", "2017-12-24 6:00:00PM"));
-            insertEvent(db, new Event("New Years Party", "2017-12-31 9:00:00PM"));
-            insertItem(db, new Item("Beer", "6 pack", 5), 1);
-            insertItem(db, new Item("Cookie", "24 Box", 2), 1);
+            db.execSQL(getCreateMasterTableSql());
+            db.execSQL(getCreateDetailTableSql());
         } catch (SQLException sqle) {
             String msg = "[MyPlanetDbHelper / updateMyDatabase/insertCountry] DB unavailable";
             msg += "\n\n" + sqle.toString();
@@ -64,12 +57,6 @@ public class PotluckDbHelper extends SQLiteOpenHelper {
         return sql;
     }
 
-    private String getDeleteMasterTableSql() {
-        String sql = "";
-        sql += "DROP TABLE IF EXISTS EVENT_MASTER;";
-        return sql;
-    }
-
     private String getCreateDetailTableSql() {
         String sql= "";
         sql += "CREATE TABLE EVENT_DETAIL (";
@@ -82,13 +69,7 @@ public class PotluckDbHelper extends SQLiteOpenHelper {
         sql += ");";
         return sql;
     }
-
-    private String getDeleteDetailTableSql() {
-        String sql = "";
-        sql += "DROP TABLE IF EXISTS EVENT_DETAIL;";
-        return sql;
-    }
-
+    
     private void insertEvent(SQLiteDatabase db, Event evnt) {
         ContentValues values = new ContentValues();
         values.put("EVENT_NAME", evnt.getEventName());

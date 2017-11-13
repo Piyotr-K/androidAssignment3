@@ -73,7 +73,6 @@ public class ItemActivity extends AppCompatActivity {
         return adapter;
     }
 
-    @SuppressWarnings("deprecation")
     private void addItem(String itemName, String itemUnit, String itemAmt) {
         try {
             ContentValues values = new ContentValues();
@@ -89,10 +88,9 @@ public class ItemActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
+        refresh();
     }
 
-    @SuppressWarnings("deprecation")
     private void deleteItem(String eventName) {
         try {
             db.execSQL("DELETE FROM EVENT_DETAIL WHERE ItemName LIKE '%" + eventName + "%';");
@@ -103,10 +101,9 @@ public class ItemActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
+        refresh();
     }
 
-    @SuppressWarnings("deprecation")
     private void findItem(String eventName) {
         try {
             loadSql = eventName;
@@ -117,14 +114,17 @@ public class ItemActivity extends AppCompatActivity {
             Toast t = Toast.makeText(this, msg, Toast.LENGTH_LONG);
             t.show();
         }
-        cursor.requery();
-        ItemActivity.this.recreate();
+        refresh();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void refresh() {
+        ItemActivity.this.recreate();
     }
 
     @Override
